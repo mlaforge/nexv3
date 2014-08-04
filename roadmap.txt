@@ -1,0 +1,4 @@
+- Nex::setup() à faire
+- Class Router
+- Nex::newApplication OK
+- Nex::autoload
