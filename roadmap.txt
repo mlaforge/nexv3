@@ -1,4 +1,5 @@
 - Nex::setup() à faire
 - Class Router
-- Nex::newApplication OK
-- Nex::autoload
+- OK Nex::newApplication
+- OK Nex::autoload app
+- Application routing interne

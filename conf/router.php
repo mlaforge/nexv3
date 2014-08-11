@@ -11,8 +11,8 @@
 $config['router'] = array(
     'uriProtocol' => 'REQUEST_URI', // PATH_INFO | ORIG_PATH_INFO | REQUEST_URI | PHP_SELF
     'default' => array(
-        'controller' => 'Error404',
-        'method' => 'route',
+        'controller' => 'Error404_Controller',
+        'method' => '::route',
         'uri' => 'index',
     ),
 );

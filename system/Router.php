@@ -13,10 +13,10 @@ class Router
 {
     protected $controllerPrefix = '' ;
 	protected $controller ;
-	protected $methodPrefix = '' ;
 	protected $method ;
 
     protected $uri ;
+	protected $remainingUri ;
 
     protected $config ;
     protected $routes ;
@@ -27,11 +27,25 @@ class Router
         $this->routes = $routes ;
     }
 
-    public function setControllerPrefix( $prefix ) { $this->controllerPrefix = $prefix; }
-	public function setMethodPrefix( $prefix ) { $this->methodPrefix = $prefix; }
+	public function setRoutes($routes) { $this->routes = $routes; }
 
-	public function getControllerToCall() { return $this->controllerPrefix.$this->controller ; }
-	public function getMethodToCall() { return $this->methodPrefix.$this->method ; }
+    public function setControllerPrefix( $prefix ) { $this->controllerPrefix = $prefix; }
+
+	public function makeCall()
+	{
+		if ( is_object($this->controller) ) {
+			call_user_func_array(array($this->controller, $this->method), $this);
+		}
+		elseif ( substr($this->method, 0, 2) == '::' ) {
+			$fullname = Nex::getClassInfo($this->controllerPrefix.$this->controller, 'fullname');
+			$method = substr($this->method, 2);
+			$fullname::$method($this);
+		}
+		else {
+			$obj = Nex::newObj($this->controllerPrefix.$this->controller);
+			$obj->{$this->method}($this);
+		}
+	}
 
     public function analyseURI( $uri = null )
     {
@@ -47,6 +61,13 @@ class Router
 
 		if ( !$this->controller ) $this->controller = $this->config['default']['controller'];
 		if ( !$this->method ) $this->method = $this->config['default']['method'];
+	}
+
+	public function analyseRemainingURI ()
+	{
+		$uri = $this->remainingUri ? $this->remainingUri : $this->config['default']['uri'] ;
+
+		$this->analyseURI($uri);
 	}
 
     public function getUriFromProtocol()
@@ -89,10 +110,14 @@ class Router
 	{
 		// Regex
 		if ( substr($route, 0, 1) == '/' && preg_match($route, $uri) ) {
+			$this->remainingUri = preg_replace($route, '', $uri);
+			$this->remainingUri = substr($this->remainingUri, 0, 1) == '/' ? substr($this->remainingUri, 1) : $this->remainingUri ;
 			return true;
 		}
 		// StartWith
 		elseif ( substr($uri, 0, strlen($route)) == $route ) {
+			$this->remainingUri = substr($uri, strlen($route));
+			$this->remainingUri = substr($this->remainingUri, 0, 1) == '/' ? substr($this->remainingUri, 1) : $this->remainingUri ;
 			return true ;
 		}
 

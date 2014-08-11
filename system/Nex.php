@@ -13,14 +13,20 @@ namespace Nex\System ;
 
 class Nex
 {
-    const		APP_SUFFIX = '_App' ;
-	const		APP_NS = 'App\\' ;
+    const APP_SUFFIX = '_App' ;
+	const APP_NS = 'App\\' ;
+	const APP_DIR = '' ;
 
-	const		MOD_SUFFIX = '_Mod' ;
-	const		CTRLR_SUFFIX = '_Controller' ;
-    const 		HELPER_SUFFIX = '' ;
-	const		LIB_SUFFIX = '_Lib' ;
-	const		MDL_SUFFIX = '_Model' ;
+	const MOD_SUFFIX = '_Mod' ;
+
+	const CTRLR_SUFFIX = '_Controller' ;
+	const CTRLR_DIR = 'controller/' ;
+
+	const LIB_SUFFIX = '_Lib' ;
+	const LIB_DIR = 'lib/' ;
+
+	const MDL_SUFFIX = '_Model' ;
+	const MDL_DIR = 'model/' ;
 
     private static $config ;
 
@@ -41,22 +47,50 @@ class Nex
 	{
 		// Set default timezone early to avoid strict errors
         date_default_timezone_set(self::config('locale.tz'));
+
+		// Sets autoloading function
+		spl_autoload_register(array(__CLASS__, 'autoload'));
 	}
 
 	public static function config($key) { return self::$config->get($key); }
 	public static function configObj() { return self::$config; }
 
 	// Namespace may or may not be given
-	public static function newApplication($name)
+	// but class suffix must
+	public static function newObj($name)
 	{
-		$info = self::getAppInfo($name);
+		$info = self::getClassInfo($name);
 
-		$classname = self::APP_NS.$info['namespace'].'\\'.$info['name'].self::APP_SUFFIX ;
+		if ( !file_exists($info['path'])) {
+			trigger_error('Obj "'.$info['fullname'].'" could not be instanciated. File was not found', E_USER_ERROR);
+		}
 
-		return new $classname ;
+		require_once($info['path']);
+
+		return new $info['fullname'] ;
 	}
 
-	public function getAppInfo( $app, $index = null )
+	/**
+	 * Autoloading for class in app/
+	 * Class must be in the form of "NS\Application\Classname"
+	 */
+	public static function autoload($class)
+	{
+		var_dump($class);
+		var_dump(self::getClassInfo($class));
+		$path = self::getClassInfo($class, 'path');
+
+		if ( ! $path || ! file_exists($path) ) {
+			trigger_error('Class "'.$class.'" could not be autoloaded. File doesn\'t exist at : '.$path, E_USER_ERROR);
+			return false ;
+		}
+
+        require($path);
+
+        return true ;
+	}
+
+	public static function getAppInfo( $app, $index = null )
 	{
 		$info = array(
 			'namespace' => '',
@@ -75,26 +109,127 @@ class Nex
 		return $index ? $info[$index] : $info ;
 	}
 
-	// @todo need to check extend
-	public function guessAppNamespace($app)
+	public static function guessAppNamespace($app)
 	{
 		$app = '_'.$app ;
-		$apps = self::config('apps');
+		$apps = self::getAppsByPriotity();
 
 		$found = $priority = null ;
-		foreach ( $apps as $fullname => $arr ) {
-			if ( substr($fullname, -strlen($app)) === $app && $arr['priority'] > $priority ) {
-				$priority = $arr['priority'];
-				$found = $fullname ;
+		foreach ( $apps as $arr ) {
+			if ( substr($arr['name'], -strlen($app)) === $app ) {
+				$found = $arr['name'];
+				break;
 			}
 		}
 
 		if ( !$found ) {
-			trigger_error('Could not guess application namespace for "'.$app.'"', E_NOTICE);
+			trigger_error('Could not guess application namespace for "'.$app.'"', E_USER_NOTICE);
 			return null ;
 		}
 
 		return strstr($found, '_', true);
+	}
+
+	public static function getDirFromSuffix($suffix)
+	{
+		$dir = '' ;
+		switch ( $suffix )
+		{
+			case self::CTRLR_SUFFIX: $dir = self::CTRLR_DIR ; break;
+			case self::APP_SUFFIX: $dir = self::APP_DIR ; break;
+			case self::MDL_SUFFIX: $dir = self::MDL_DIR ; break;
+			case self::LIB_SUFFIX: $dir = self::LIB_DIR ; break;
+		}
+
+		return $dir ;
+	}
+
+	public static function getClassInfo($name, $index = null)
+	{
+		$info = array(
+			'namespace' => '',
+			'app' => '',
+			'name' => '',
+			'suffix' => '',
+		);
+
+		$boom = explode('\\', $name);
+
+		if ( count($boom) == 5 ) { array_shift($boom); array_shift($boom); }
+		elseif ( count($boom) == 4 ) array_shift($boom);
+
+		// we got full name, with namespace and app
+		if ( count($boom) == 3 ) {
+			$info['namespace'] = array_shift($boom);
+			$info['app'] = array_shift($boom);
+			$boom = explode('_', $boom[0]);
+			$info['suffix'] = array_pop($boom); $info['suffix'] = $info['suffix'] ? '_'.$info['suffix'] : '';
+			$info['name'] = implode('_', $boom);
+			$dir = self::getDirFromSuffix($info['suffix']);
+			$classpath = implode(DS, $boom).NEX_EXT;
+		}
+		// we got application and classname, no namespace given
+		elseif ( count($boom) == 2 ) {
+			$info['app'] = array_shift($boom);
+			$boom = explode('_', $boom[0]);
+			$info['suffix'] = array_pop($boom); $info['suffix'] = $info['suffix'] ? '_'.$info['suffix'] : '';
+			$info['name'] = implode('_', $boom);
+			$classpath = implode(DS, $boom).NEX_EXT;
+
+			$dir = self::getDirFromSuffix($info['suffix']);
+			$apps = self::getAppsByPriotity();
+			foreach ( $apps as $arr ) {
+				list($ns, $app) = explode('_', $arr['name']);
+
+				if ( $app !== $info['app'] ) continue ;
+
+				if ( file_exists(DOC_ROOT.APP_PATH.$ns.DS.$app.DS.$dir.$classpath) ) {
+					$info['namespace'] = $ns ;
+					break;
+				}
+			}
+		}
+		// We got nothing
+		else {
+			$boom = explode('_', $boom[0]);
+			$info['suffix'] = array_pop($boom); $info['suffix'] = $info['suffix'] ? '_'.$info['suffix'] : '';
+			$info['name'] = implode('_', $boom);
+			$classpath = implode(DS, $boom).NEX_EXT;
+
+			$dir = self::getDirFromSuffix($info['suffix']);
+			$apps = self::getAppsByPriotity();
+			foreach ( $apps as $arr ) {
+				list($ns, $app) = explode('_', $arr['name']);
+
+				if ( file_exists(DOC_ROOT.APP_PATH.$ns.DS.$app.DS.$dir.$classpath) ) {
+					$info['namespace'] = $ns ;
+					$info['app'] = $app ;
+					break;
+				}
+			}
+		}
+
+		$info['fullname'] = '\\'.self::APP_NS.$info['namespace'].'\\'.$info['app'].'\\'.$info['name'].$info['suffix'] ;
+		$info['path'] = DOC_ROOT.APP_PATH.$info['namespace'].DS.$info['app'].DS.$dir.$classpath ;
+
+		return $index ? $info[$index] : $info ;
+	}
+
+	public static function getAppsByPriotity()
+	{
+		static $appsByPriority = array();
+
+		if ( count($appsByPriority) ) return $appsByPriority ;
+
+		$apps = self::config('apps');
+		foreach ( $apps as $fullname => $arr ) {
+			$arr['name'] = $fullname ;
+			$appsByPriority[$arr['priority']] = $arr ;
+		}
+
+		krsort($appsByPriority, SORT_NUMERIC);
+
+		return $appsByPriority ;
 	}
 }
 
