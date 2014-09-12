@@ -4,8 +4,9 @@
  * Key are the regex and values are the replacement.
  * When a certain key match, system will boot like if value of the key was called
  * A route is something like 'admin/page/edition'
- * '/^index(\.php)?/' => 'MyApplication'
- * 'startWith' => 'MyApplication'
+ * '/^index(\.php)?/' => 'MyApp' (regex)
+ * 'startWith' => 'My' (Start with)
+ * '*' => 'MyApp' (Catch all, has lowest priority)
  */
 
 $config['router'] = array(
@@ -13,7 +14,6 @@ $config['router'] = array(
     'default' => array(
         'controller' => 'Error404_Controller',
         'method' => '::route',
-        'uri' => 'index',
     ),
 );
 

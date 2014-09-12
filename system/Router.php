@@ -27,7 +27,7 @@ class Router
         $this->routes = $routes ;
     }
 
-	public function setRoutes($routes) { $this->routes = $routes; }
+	public function setRoutes($routes) { $this->routes = $routes; $this->sortRoutes($this->routes); }
 
     public function setControllerPrefix( $prefix ) { $this->controllerPrefix = $prefix; }
 
@@ -65,9 +65,7 @@ class Router
 
 	public function analyseRemainingURI ()
 	{
-		$uri = $this->remainingUri ? $this->remainingUri : $this->config['default']['uri'] ;
-
-		$this->analyseURI($uri);
+		$this->analyseURI($this->remainingUri);
 	}
 
     public function getUriFromProtocol()
@@ -85,8 +83,6 @@ class Router
 		elseif ( substr($uri, 0, 1) == '/' ) {
 			$uri = substr($uri, 1);
 		}
-
-		if ( !$uri ) $uri = $this->config['default']['uri'];
 
 		return $uri ;
 	}
@@ -108,20 +104,32 @@ class Router
 
 	protected function matchURI($route, $uri)
 	{
-		// Regex
-		if ( substr($route, 0, 1) == '/' && preg_match($route, $uri) ) {
-			$this->remainingUri = preg_replace($route, '', $uri);
-			$this->remainingUri = substr($this->remainingUri, 0, 1) == '/' ? substr($this->remainingUri, 1) : $this->remainingUri ;
-			return true;
-		}
-		// StartWith
-		elseif ( substr($uri, 0, strlen($route)) == $route ) {
-			$this->remainingUri = substr($uri, strlen($route));
-			$this->remainingUri = substr($this->remainingUri, 0, 1) == '/' ? substr($this->remainingUri, 1) : $this->remainingUri ;
+		// Everything match
+		if ( $route == '*' ) {
+			$this->remainingUri = $uri;
 			return true ;
+		}
+		elseif ( $uri ) {
+			// Regex
+			if ( substr($route, 0, 1) == '/' && preg_match($route, $uri) ) {
+				$this->remainingUri = preg_replace($route, '', $uri);
+				$this->remainingUri = substr($this->remainingUri, 0, 1) == '/' ? substr($this->remainingUri, 1) : $this->remainingUri ;
+				return true;
+			}
+			// StartWith
+			elseif ( substr($uri, 0, strlen($route)) == $route ) {
+				$this->remainingUri = substr($uri, strlen($route));
+				$this->remainingUri = substr($this->remainingUri, 0, 1) == '/' ? substr($this->remainingUri, 1) : $this->remainingUri ;
+				return true ;
+			}
 		}
 
 		return false ;
+	}
+
+	protected function sortRoutes(& $routes)
+	{
+		krsort($routes);
 	}
 
     public static function stripQuery($uri)

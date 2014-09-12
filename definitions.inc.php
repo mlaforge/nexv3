@@ -31,7 +31,7 @@ define('NEX_EOL', PHP_EOL);
 define('NEX_MAIL_EOL', NEX_EOL);
 
 // System version
-define('NEX_VERSION', '3.0.0'); // 3.0.0 use namespace
+define('NEX_VERSION', '3.0.0');
 
 // Url base without domain
 // Ex: /dir/ or /dir1/dir2/

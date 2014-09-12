@@ -76,8 +76,6 @@ class Nex
 	 */
 	public static function autoload($class)
 	{
-		var_dump($class);
-		var_dump(self::getClassInfo($class));
 		$path = self::getClassInfo($class, 'path');
 
 		if ( ! $path || ! file_exists($path) ) {
@@ -230,6 +228,18 @@ class Nex
 		krsort($appsByPriority, SORT_NUMERIC);
 
 		return $appsByPriority ;
+	}
+
+	public static function findDesignFile($file)
+	{
+		$zones = self::config('design.zones');
+		foreach ( $zones as $dir ) {
+			if ( file_exists(DESIGN_PATH.$dir.DS.$file) ) {
+				return DESIGN_PATH.$dir.DS.$file ;
+			}
+		}
+
+		return false ;
 	}
 }
 

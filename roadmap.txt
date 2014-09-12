@@ -2,4 +2,7 @@
 - Class Router
 - OK Nex::newApplication
 - OK Nex::autoload app
-- Application routing interne
+- OK Application routing interne
+- OK No default URI ?
+- Load app config
+- Layout loading/rendering
