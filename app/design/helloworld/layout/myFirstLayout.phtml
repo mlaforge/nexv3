@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
-    <head></head>
+    <head>
+        <?php //echo $this->inlineView('head') ?>
+        <?php echo $this->inlineController('Html_Head')->index() ?>
+    </head>
     <body>
-        my first layout yeahh
+        <?php echo $this->inlineView('content') ?>
     </body>
 </html>

@@ -3,7 +3,7 @@
 namespace App\Nex\Core ;
 use Nex\System\Nex ;
 
-class Application_Lib
+class Application
 {
     protected static $routes = array();
 

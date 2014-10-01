@@ -1,8 +1,10 @@
 - Nex::setup() à faire
-- Class Router
+- OK Class Router
 - OK Nex::newApplication
 - OK Nex::autoload app
 - OK Application routing interne
 - OK No default URI ?
-- Load app config
-- Layout loading/rendering
+- OK Load app config
+- Layout loading/rendering ( Need templating system )
+- Database abstraction layer Lib
+- Gestion des erreur / exceptions

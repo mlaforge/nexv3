@@ -130,16 +130,16 @@ class Nex
 
 	public static function getDirFromSuffix($suffix)
 	{
-		$dir = '' ;
 		switch ( $suffix )
 		{
-			case self::CTRLR_SUFFIX: $dir = self::CTRLR_DIR ; break;
-			case self::APP_SUFFIX: $dir = self::APP_DIR ; break;
-			case self::MDL_SUFFIX: $dir = self::MDL_DIR ; break;
-			case self::LIB_SUFFIX: $dir = self::LIB_DIR ; break;
+			case self::CTRLR_SUFFIX: return self::CTRLR_DIR ;
+			case self::APP_SUFFIX: return self::APP_DIR ;
+			case self::MDL_SUFFIX: return self::MDL_DIR ;
+			case self::LIB_SUFFIX:
+			case '': return self::LIB_DIR ; break;
 		}
 
-		return $dir ;
+		return '' ;
 	}
 
 	public static function getClassInfo($name, $index = null)
@@ -161,8 +161,7 @@ class Nex
 			$info['namespace'] = array_shift($boom);
 			$info['app'] = array_shift($boom);
 			$boom = explode('_', $boom[0]);
-			$info['suffix'] = array_pop($boom); $info['suffix'] = $info['suffix'] ? '_'.$info['suffix'] : '';
-			$info['name'] = implode('_', $boom);
+			self::completeClassInfo($boom, $info);
 			$dir = self::getDirFromSuffix($info['suffix']);
 			$classpath = implode(DS, $boom).NEX_EXT;
 		}
@@ -170,8 +169,7 @@ class Nex
 		elseif ( count($boom) == 2 ) {
 			$info['app'] = array_shift($boom);
 			$boom = explode('_', $boom[0]);
-			$info['suffix'] = array_pop($boom); $info['suffix'] = $info['suffix'] ? '_'.$info['suffix'] : '';
-			$info['name'] = implode('_', $boom);
+			self::completeClassInfo($boom, $info);
 			$classpath = implode(DS, $boom).NEX_EXT;
 
 			$dir = self::getDirFromSuffix($info['suffix']);
@@ -190,15 +188,13 @@ class Nex
 		// We got nothing
 		else {
 			$boom = explode('_', $boom[0]);
-			$info['suffix'] = array_pop($boom); $info['suffix'] = $info['suffix'] ? '_'.$info['suffix'] : '';
-			$info['name'] = implode('_', $boom);
+			self::completeClassInfo($boom, $info);
 			$classpath = implode(DS, $boom).NEX_EXT;
 
 			$dir = self::getDirFromSuffix($info['suffix']);
 			$apps = self::getAppsByPriotity();
 			foreach ( $apps as $arr ) {
 				list($ns, $app) = explode('_', $arr['name']);
-
 				if ( file_exists(DOC_ROOT.APP_PATH.$ns.DS.$app.DS.$dir.$classpath) ) {
 					$info['namespace'] = $ns ;
 					$info['app'] = $app ;
@@ -211,6 +207,20 @@ class Nex
 		$info['path'] = DOC_ROOT.APP_PATH.$info['namespace'].DS.$info['app'].DS.$dir.$classpath ;
 
 		return $index ? $info[$index] : $info ;
+	}
+
+	protected static function completeClassInfo(& $boom, & $info)
+	{
+		static $possibleSuffix = array(self::CTRLR_SUFFIX, self::APP_SUFFIX, self::MDL_SUFFIX, self::LIB_SUFFIX);
+
+		$suffix = end($boom);
+
+		if ( in_array('_'.$suffix, $possibleSuffix) ) {
+			array_pop($boom);
+			$info['suffix'] = '_'.$suffix;
+		}
+
+		$info['name'] = implode('_', $boom);
 	}
 
 	public static function getAppsByPriotity()

@@ -2,7 +2,7 @@
 
 namespace App\Nex\Core ;
 
-class Layout_Lib extends View_Lib
+class Layout extends View
 {
     protected $baseDir = 'layout/' ;
 }
