@@ -1,4 +1,6 @@
 - Nex::setup() à faire
+- Controller Nex 404
+- Controller Nex 403
 - OK Class Router
 - OK Nex::newApplication
 - OK Nex::autoload app

@@ -109,14 +109,26 @@ class Router
 			$this->remainingUri = $uri;
 			return true ;
 		}
-		elseif ( $uri ) {
+		elseif ( $route )
+		{
 			// Regex
-			if ( substr($route, 0, 1) == '/' && preg_match($route, $uri) ) {
-				$this->remainingUri = preg_replace($route, '', $uri);
-				$this->remainingUri = substr($this->remainingUri, 0, 1) == '/' ? substr($this->remainingUri, 1) : $this->remainingUri ;
-				return true;
+			if ( substr($route, 0, 1) == '~' ) {
+				$route = substr($route, 1);
+				if ( preg_match($route, $uri) ) {
+					$this->remainingUri = preg_replace($route, '', $uri);
+					$this->remainingUri = substr($this->remainingUri, 0, 1) == '/' ? substr($this->remainingUri, 1) : $this->remainingUri ;
+					return true;
+				}
 			}
-			// StartWith
+			// Equals
+			elseif ( substr($route, 0, 1) == '=' ) {
+				$route = substr($route, 1);
+				if ( $route == $uri ) {
+					$this->remainingUri = '' ;
+					return true;
+				}
+			}
+			// Starts with
 			elseif ( substr($uri, 0, strlen($route)) == $route ) {
 				$this->remainingUri = substr($uri, strlen($route));
 				$this->remainingUri = substr($this->remainingUri, 0, 1) == '/' ? substr($this->remainingUri, 1) : $this->remainingUri ;

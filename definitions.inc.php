@@ -1,11 +1,8 @@
 <?php
 
 // Directories
-define('APP_PATH'       , 'app/code/'); // Applications, this is where you code
 define('CONF_PATH'      , 'conf/'); // Main system configuration, this is where you declare your apps and base functionnalities
-define('DESIGN_PATH'	, 'app/design/'); // Application design
 define('EXT_PATH'       , 'vendor/'); // Packages, class, anything that has nothing to do with this framework
-define('I18N_PATH'      , 'app/i18n/'); // System internationnalization
 define('PRIV_PATH'		, 'private/'); // Private files, should not be accessible by http
 define('PUB_PATH'		, 'public/'); // Public files, should be accessible by http
 define('SKIN_PATH'      , 'assets/'); // Public files related to your apps like images, css, scripts. Accessible by http

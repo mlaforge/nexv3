@@ -28,6 +28,10 @@ class Nex
 	const MDL_SUFFIX = '_Model' ;
 	const MDL_DIR = 'model/' ;
 
+	const CODE_DIR = 'code/';
+	const I18N_DIR = 'i18n/';
+	const DESIGN_DIR = 'design/';
+
     private static $config ;
 
     public static function init( )
@@ -110,7 +114,7 @@ class Nex
 	public static function guessAppNamespace($app)
 	{
 		$app = '_'.$app ;
-		$apps = self::getAppsByPriotity();
+		$apps = self::getAppsByPriority();
 
 		$found = $priority = null ;
 		foreach ( $apps as $arr ) {
@@ -164,6 +168,7 @@ class Nex
 			self::completeClassInfo($boom, $info);
 			$dir = self::getDirFromSuffix($info['suffix']);
 			$classpath = implode(DS, $boom).NEX_EXT;
+			$pool = self::config('apps.'.$info['namespace'].'_'.$info['app'].'.pool') ;
 		}
 		// we got application and classname, no namespace given
 		elseif ( count($boom) == 2 ) {
@@ -173,13 +178,14 @@ class Nex
 			$classpath = implode(DS, $boom).NEX_EXT;
 
 			$dir = self::getDirFromSuffix($info['suffix']);
-			$apps = self::getAppsByPriotity();
+			$apps = self::getAppsByPriority();
 			foreach ( $apps as $arr ) {
 				list($ns, $app) = explode('_', $arr['name']);
 
 				if ( $app !== $info['app'] ) continue ;
 
-				if ( file_exists(DOC_ROOT.APP_PATH.$ns.DS.$app.DS.$dir.$classpath) ) {
+				$pool = self::config('apps.'.$ns.'_'.$app.'.pool') ;
+				if ( file_exists(DOC_ROOT.$pool.self::CODE_DIR.$ns.DS.$app.DS.$dir.$classpath) ) {
 					$info['namespace'] = $ns ;
 					break;
 				}
@@ -192,10 +198,11 @@ class Nex
 			$classpath = implode(DS, $boom).NEX_EXT;
 
 			$dir = self::getDirFromSuffix($info['suffix']);
-			$apps = self::getAppsByPriotity();
+			$apps = self::getAppsByPriority();
 			foreach ( $apps as $arr ) {
 				list($ns, $app) = explode('_', $arr['name']);
-				if ( file_exists(DOC_ROOT.APP_PATH.$ns.DS.$app.DS.$dir.$classpath) ) {
+				$pool = self::config('apps.'.$ns.'_'.$app.'.pool') ;
+				if ( file_exists(DOC_ROOT.$pool.self::CODE_DIR.$ns.DS.$app.DS.$dir.$classpath) ) {
 					$info['namespace'] = $ns ;
 					$info['app'] = $app ;
 					break;
@@ -204,7 +211,7 @@ class Nex
 		}
 
 		$info['fullname'] = '\\'.self::APP_NS.$info['namespace'].'\\'.$info['app'].'\\'.$info['name'].$info['suffix'] ;
-		$info['path'] = DOC_ROOT.APP_PATH.$info['namespace'].DS.$info['app'].DS.$dir.$classpath ;
+		$info['path'] = DOC_ROOT.$pool.self::CODE_DIR.$info['namespace'].DS.$info['app'].DS.$dir.$classpath ;
 
 		return $index ? $info[$index] : $info ;
 	}
@@ -223,7 +230,7 @@ class Nex
 		$info['name'] = implode('_', $boom);
 	}
 
-	public static function getAppsByPriotity()
+	public static function getAppsByPriority()
 	{
 		static $appsByPriority = array();
 
@@ -240,12 +247,31 @@ class Nex
 		return $appsByPriority ;
 	}
 
+	public static function getPools()
+	{
+		static $pools = array();
+
+		if ( count($pools) ) return $pools;
+
+		$apps = self::getAppsByPriority();
+		foreach ( $apps as $arr ) {
+			if ( !in_array($arr['pool'], $pools) ) {
+				$pools[] = $arr['pool'];
+			}
+		}
+
+		return $pools ;
+	}
+
 	public static function findDesignFile($file)
 	{
+		$pools = self::getPools();
 		$zones = self::config('design.zones');
-		foreach ( $zones as $dir ) {
-			if ( file_exists(DESIGN_PATH.$dir.DS.$file) ) {
-				return DESIGN_PATH.$dir.DS.$file ;
+		foreach ( $pools as $pool ) {
+			foreach ( $zones as $zone ) {
+				if ( file_exists(DOC_ROOT.$pool.self::DESIGN_DIR.$zone.DS.$file) ) {
+					return $pool.self::DESIGN_DIR.$zone.DS.$file ;
+				}
 			}
 		}
 
