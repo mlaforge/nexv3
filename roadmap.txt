@@ -8,5 +8,5 @@
 - OK No default URI ?
 - OK Load app config
 - Layout loading/rendering ( Need templating system )
-- Database abstraction layer Lib
+- Database abstraction layer Lib (Working on lib Query)
 - Gestion des erreur / exceptions
