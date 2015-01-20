@@ -19,6 +19,10 @@ class Helloworld_App extends Core\Application
 
     public function indexAction()
     {
+        // Test de requête
+        $db = new Core\DB();
+        $db->query('SELECT * FROM test');
+
         $layout = new Core\Layout('myFirstLayout');
         $layout->set('title', 'Titre de l\'app Helloworld');
         $layout->render();
