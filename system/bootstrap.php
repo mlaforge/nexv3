@@ -11,6 +11,7 @@ Nex::init();
 // Load base config
 Nex::configObj()->loadDir(CONF_PATH);
 Nex::configObj()->loadDir(CONF_PATH.'app'.DS);
+Nex::configObj()->loadDir(CONF_PATH.'vendor'.DS);
 
 // Setup environnement with base config
 Nex::setup();

@@ -1,13 +1,13 @@
 <?php
 
 // Directories
+define('APP_PATH'       , 'app/'); // Container for apps code, design and i18n
 define('CONF_PATH'      , 'conf/'); // Main system configuration, this is where you declare your apps and base functionnalities
-define('EXT_PATH'       , 'vendor/'); // Packages, class, anything that has nothing to do with this framework
-define('PRIV_PATH'		, 'private/'); // Private files, should not be accessible by http
-define('PUB_PATH'		, 'public/'); // Public files, should be accessible by http
-define('SKIN_PATH'      , 'assets/'); // Public files related to your apps like images, css, scripts. Accessible by http
+define('VENDOR_PATH'    , 'vendor/'); // Packages, components, classes, anything that has nothing to do with framework's base
+define('MEDIA_PATH'		, 'media/'); // Public files uploaded, should be accessible by http
+define('ASSETS_PATH'    , 'assets/'); // front controller and your assets (images, JavaScript, CSS, etc.)
 define('SYS_PATH'       , 'system/'); // System boot sector, no touch
-define('VAR_PATH'       , 'system/var/'); // System files like logs, error templates, etc
+define('VAR_PATH'       , 'var/'); // System files like logs, error templates, etc
 define('TMP_PATH'		, 'tmp/'); // Temporary files
 
 // File extensions
@@ -27,8 +27,6 @@ define('NEX_BACKTICK', '`');
 define('NEX_EOL', PHP_EOL);
 define('NEX_MAIL_EOL', NEX_EOL);
 
-// System version
-define('NEX_VERSION', '3.0.0');
 
 // Url base without domain
 // Ex: /dir/ or /dir1/dir2/

@@ -1,1 +1,1 @@
-skin/assets files (css, scripts, fonts, imgs)
+assets (skin) files (css, scripts, fonts, imgs)

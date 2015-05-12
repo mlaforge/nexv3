@@ -15,6 +15,8 @@ class Helloworld_App extends Core\Application
     public function __construct()
     {
         parent::__construct('Helloworld');
+
+        $this->loadVendor('NexUtils');
     }
 
     public function indexAction()

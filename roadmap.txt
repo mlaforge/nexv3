@@ -7,6 +7,29 @@
 - OK Application routing interne
 - OK No default URI ?
 - OK Load app config
+- manage components
 - Layout loading/rendering ( Need templating system )
-- Database abstraction layer Lib (Working on lib Query)
+- Database abstraction layer Lib (Working on it)
 - Gestion des erreur / exceptions
+- Url tools (site, redirect, addParam, etc)
+- i18n system / lang files
+
+
+Structure du dossier app, comparatifs:
+app/NS/APP/code
+app/NS/APP/design
+app/NS/APP/i18n
+app/NS/APP/conf
+
++ plus facile de gérer un repo git
++ code mieux regroupé par app. Mais les assets/skin sont quand même sorties, car ils doivent être accessible par http.
++ plus intuitif qu'un design/système de langue/conf appartient à une app
+
+app/code/NS/APP
+app/design/ZONE/
+app/i18n/ZONE/
+conf/app/APP/
+
++ structuré par intervenant (contenu, intégrateur, programmeur)
++ plus facile de partager du design ou système de langue entre apps
++ plus facile de gérer de les configurations

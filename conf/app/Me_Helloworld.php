@@ -1,7 +1,6 @@
 <?php
 
 $config['apps']['Me_Helloworld'] = array(
-    'pool' => 'app/',
     'priority' => 999, // Higher, Highest priority
 );
 

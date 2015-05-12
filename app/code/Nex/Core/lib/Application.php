@@ -24,4 +24,8 @@ class Application
         if ( is_dir(CONF_PATH.'app'.DS.$app.DS) )
             Nex::configObj()->loadDir(CONF_PATH.'app'.DS.$app.DS);
     }
+
+    protected function loadVendor($name) {
+        Nex::loadVendor($name);
+    }
 }

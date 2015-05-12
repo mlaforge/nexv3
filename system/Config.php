@@ -83,7 +83,7 @@ class Config
 			}
 		}
 		else {
-			return null ;
+            trigger_error('Could not find config "'.$path.'"');
 		}
 	}
 }

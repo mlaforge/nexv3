@@ -50,7 +50,7 @@ class Router
     public function analyseURI( $uri = null )
     {
 		$this->controller = $this->method = '' ;
-        $this->uri = $uri ?: $this->getUriFromProtocol();
+        $this->uri = $uri ?: self::getUriFromProtocol();
 
         foreach ( $this->routes as $route => $info ) {
 			if ( $this->matchURI($route, $this->uri) ) {
@@ -66,25 +66,6 @@ class Router
 	public function analyseRemainingURI ()
 	{
 		$this->analyseURI($this->remainingUri);
-	}
-
-    public function getUriFromProtocol()
-	{
-        $uri = $_SERVER[$this->config['uriProtocol']] ; // PATH_INFO | REQUEST_URI | PHP_SELF
-
-        $uri = self::stripQuery($uri);
-
-		// Prevent multiple slashes to avoid cross site requests via the FAPI.
-		$uri = '/'. ltrim($uri, '/');
-
-		if( defined('NEX_BASE_URL') && stripos($uri, NEX_BASE_URL) === 0 ){
-			$uri = substr($uri, strlen(NEX_BASE_URL));
-		}
-		elseif ( substr($uri, 0, 1) == '/' ) {
-			$uri = substr($uri, 1);
-		}
-
-		return $uri ;
 	}
 
 	protected function fillInfos($info)
@@ -143,6 +124,25 @@ class Router
 	{
 		krsort($routes);
 	}
+
+    public static function getUriFromProtocol()
+    {
+        $uri = $_SERVER[Nex::config('router.uriProtocol')] ; // PATH_INFO | REQUEST_URI | PHP_SELF
+
+        $uri = self::stripQuery($uri);
+
+        // Prevent multiple slashes to avoid cross site requests via the FAPI.
+        $uri = '/'. ltrim($uri, '/');
+
+        if( defined('NEX_BASE_URL') && stripos($uri, NEX_BASE_URL) === 0 ){
+            $uri = substr($uri, strlen(NEX_BASE_URL));
+        }
+        elseif ( substr($uri, 0, 1) == '/' ) {
+            $uri = substr($uri, 1);
+        }
+
+        return $uri ;
+    }
 
     public static function stripQuery($uri)
 	{

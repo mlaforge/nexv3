@@ -15,9 +15,6 @@ class Nex
 {
     const APP_SUFFIX = '_App' ;
 	const APP_NS = 'App\\' ;
-	const APP_DIR = '' ;
-
-	const MOD_SUFFIX = '_Mod' ;
 
 	const CTRLR_SUFFIX = '_Controller' ;
 	const CTRLR_DIR = 'controller/' ;
@@ -137,7 +134,6 @@ class Nex
 		switch ( $suffix )
 		{
 			case self::CTRLR_SUFFIX: return self::CTRLR_DIR ;
-			case self::APP_SUFFIX: return self::APP_DIR ;
 			case self::MDL_SUFFIX: return self::MDL_DIR ;
 			case self::LIB_SUFFIX:
 			case '': return self::LIB_DIR ; break;
@@ -168,7 +164,6 @@ class Nex
 			self::completeClassInfo($boom, $info);
 			$dir = self::getDirFromSuffix($info['suffix']);
 			$classpath = implode(DS, $boom).NEX_EXT;
-			$pool = self::config('apps.'.$info['namespace'].'_'.$info['app'].'.pool') ;
 		}
 		// we got application and classname, no namespace given
 		elseif ( count($boom) == 2 ) {
@@ -184,8 +179,7 @@ class Nex
 
 				if ( $app !== $info['app'] ) continue ;
 
-				$pool = self::config('apps.'.$ns.'_'.$app.'.pool') ;
-				if ( file_exists(DOC_ROOT.$pool.self::CODE_DIR.$ns.DS.$app.DS.$dir.$classpath) ) {
+				if ( file_exists(DOC_ROOT.APP_PATH.self::CODE_DIR.$ns.DS.$app.DS.$dir.$classpath) ) {
 					$info['namespace'] = $ns ;
 					break;
 				}
@@ -201,8 +195,7 @@ class Nex
 			$apps = self::getAppsByPriority();
 			foreach ( $apps as $arr ) {
 				list($ns, $app) = explode('_', $arr['name']);
-				$pool = self::config('apps.'.$ns.'_'.$app.'.pool') ;
-				if ( file_exists(DOC_ROOT.$pool.self::CODE_DIR.$ns.DS.$app.DS.$dir.$classpath) ) {
+				if ( file_exists(DOC_ROOT.APP_PATH.self::CODE_DIR.$ns.DS.$app.DS.$dir.$classpath) ) {
 					$info['namespace'] = $ns ;
 					$info['app'] = $app ;
 					break;
@@ -211,7 +204,7 @@ class Nex
 		}
 
 		$info['fullname'] = '\\'.self::APP_NS.$info['namespace'].'\\'.$info['app'].'\\'.$info['name'].$info['suffix'] ;
-		$info['path'] = DOC_ROOT.$pool.self::CODE_DIR.$info['namespace'].DS.$info['app'].DS.$dir.$classpath ;
+		$info['path'] = DOC_ROOT.APP_PATH.self::CODE_DIR.$info['namespace'].DS.$info['app'].DS.$dir.$classpath ;
 
 		return $index ? $info[$index] : $info ;
 	}
@@ -247,36 +240,28 @@ class Nex
 		return $appsByPriority ;
 	}
 
-	public static function getPools()
-	{
-		static $pools = array();
-
-		if ( count($pools) ) return $pools;
-
-		$apps = self::getAppsByPriority();
-		foreach ( $apps as $arr ) {
-			if ( !in_array($arr['pool'], $pools) ) {
-				$pools[] = $arr['pool'];
-			}
-		}
-
-		return $pools ;
-	}
-
 	public static function findDesignFile($file)
 	{
-		$pools = self::getPools();
 		$zones = self::config('design.zones');
-		foreach ( $pools as $pool ) {
-			foreach ( $zones as $zone ) {
-				if ( file_exists(DOC_ROOT.$pool.self::DESIGN_DIR.$zone.DS.$file) ) {
-					return $pool.self::DESIGN_DIR.$zone.DS.$file ;
-				}
-			}
-		}
+
+        foreach ( $zones as $zone ) {
+            if ( file_exists(DOC_ROOT.APP_PATH.self::DESIGN_DIR.$zone.DS.$file) ) {
+                return APP_PATH.self::DESIGN_DIR.$zone.DS.$file ;
+            }
+        }
 
 		return false ;
 	}
+
+    public static function loadVendor($name)
+    {
+        $conf = Nex::config('vendors.'.$name);
+        if ( isset($conf['loader']['files']) ) {
+            foreach ($conf['loader']['files'] as $file) {
+                include_once(DOC_ROOT.VENDOR_PATH.$conf['dir'].$file);
+            }
+        }
+    }
 }
 
 class NexException extends \Exception
